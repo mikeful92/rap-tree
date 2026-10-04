@@ -40,9 +40,9 @@ python3 -m http.server -d docs 8000   # view at http://localhost:8000
 Useful flags:
 
 - `--only "Kendrick Lamar" "J. Cole"`: run on a subset
-- `--measure benedetto|ncd`: append-a-chunk distance (default) or [Normalized Compression Distance](https://arxiv.org/abs/cs/0312044)
+- `--measure ncd|benedetto`: Normalized Compression Distance (default) or the paper's append-a-chunk distance
 - `--compressor lzma|zstd|bz2|gzip`: lzma by default. gzip only looks back 32 KB, so it can't "see" a larger reference text
-- `--sample-kb 30 --probe-kb 3`: bytes of lyrics per artist, and size of the appended chunk
+- `--sample-kb 60 --probe-kb 3`: bytes of lyrics per artist, and size of the appended chunk (`benedetto` only)
 - `--replicates 20`: resample songs N times; branch numbers show the % of resampled trees that contain the same group
 - `build --out <name>`: write to `docs/data/<name>/`, view with `?build=<name>`
 
@@ -53,11 +53,29 @@ Useful flags:
    - Genius section headers say who performs each part (`[Verse 2: Jay Rock]`). Sections credited only to other people are dropped, so features don't leak style between artists. Unattributed sections count as the primary artist's. For groups (Migos, OutKast…) the `aliases` column lists members, so their verses are kept.
    - Text is lowercased and stripped of punctuation except apostrophes. Ad-libs are kept as words.
    - A line that already appeared anywhere in the artist's corpus is dropped. Otherwise a hook repeated 4× would make that artist look very "compressible".
-3. **Sample.** Every artist contributes exactly the same number of bytes (default 30 KB), taken from their songs in random order. Artists without enough lyrics are skipped with a message.
-4. **Distance** (`benedetto`). With `ref_A` = A's sample minus its last 3 KB and `b` = the last 3 KB of B's sample:
-   `S(A,B) = ([C(ref_A + b) − C(ref_A)] − [C(ref_B + b) − C(ref_B)]) / |b|`.
-   That is the extra bytes per character it costs to encode B using A's style instead of B's own. It is then symmetrized.
+3. **Sample.** Every artist contributes exactly the same number of bytes (default 60 KB), taken from their songs in random order. Artists without enough lyrics are skipped with a message.
+4. **Distance** (`ncd`, default). [Normalized Compression Distance](https://arxiv.org/abs/cs/0312044) (Cilibrasi & Vitányi, 2005), the symmetric successor to the Benedetto approach:
+   `NCD(A,B) = (C(A+B) − min(C(A), C(B))) / max(C(A), C(B))`, where `C` is the lzma-compressed size.
+   If B shares A's vocabulary and phrasing, compressing them together barely costs more than A alone.
+   The paper's original append-a-chunk measure is available as `--measure benedetto`:
+   `S(A,B) = ([C(ref_A + b) − C(ref_A)] − [C(ref_B + b) − C(ref_B)]) / |b|`, with `b` the last few KB of B.
 5. **Tree.** Neighbor-joining on the distance matrix averaged over the resamples, rooted at the midpoint.
+6. **Closest artists.** Some artists sit close to everyone because their vocabulary is near the middle of the corpus. The per-artist lists therefore rank pairs by how much closer they are than their average distances predict: `(m_A + m_B − m̄ − d_AB) / (m_A + m_B − m̄)`. Neighbor-joining is unaffected by this adjustment.
+
+### Validation
+
+`raptree validate` takes two non-overlapping 30 KB samples (different songs) per artist and checks whether each sample's nearest neighbor among all 132 samples is its own twin. On the 66-artist corpus:
+
+| Setting | Self-identification |
+|---|---|
+| `ncd`, lzma (default) | 130/132 (98%) |
+| `ncd`, zstd | 128/132 (97%) |
+| `benedetto`, lzma, 8 KB chunk | 117/132 (89%) |
+| `benedetto`, lzma, 3 KB chunk | 87/132 (66%) |
+
+Chance would be under 1%. The appended-chunk measure gets noisy when the chunk is small, so NCD is the default.
+
+Distances between different artists are tightly packed (NCD 0.90–0.95), since most of any verse is ordinary English. Larger samples matter for the tree: going from 30 KB to 60 KB per artist raised the number of groupings that reappear in at least half of the resampled trees from 4 to 18 (out of 64).
 
 ### Caveats
 

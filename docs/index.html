@@ -139,7 +139,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: s
     </dl>
     <div class="near-title">Closest by compression</div>
     <ol class="near" id="near"></ol>
-    <p class="hint">Click any name on the record to read its notes. Dashed branches are groupings that held up in fewer than half of the resampled trees.</p>
+    <p class="hint">Percentages show how much closer two artists are than their overall averages predict. Click any name on the record to read its notes. Dashed branches are groupings that held up in fewer than half of the resampled trees.</p>
   </aside>
 </main>
 
@@ -148,7 +148,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: s
     <h2>How it works</h2>
     <div class="steps">
       <div><div class="num">01</div><h3>Collect</h3><p>About 60 popular songs per artist from Genius. Guest verses and repeated hooks are stripped, so every line is the artist's own.</p></div>
-      <div><div class="num">02</div><h3>Compress</h3><p>Every artist gets the same amount of text. Append a chunk of one artist's lyrics to another's and count the extra bytes it costs to compress (Benedetto, Caglioti &amp; Loreto, <a href="https://arxiv.org/abs/cond-mat/0108530">2002</a>).</p></div>
+      <div><div class="num">02</div><h3>Compress</h3><p>Every artist gets the same amount of text. Compress two artists together: the more their lyrics overlap, the less the second one adds (<a href="https://arxiv.org/abs/cs/0312044">normalized compression distance</a>, after Benedetto, Caglioti &amp; Loreto, <a href="https://arxiv.org/abs/cond-mat/0108530">2002</a>).</p></div>
       <div><div class="num">03</div><h3>Grow</h3><p>Neighbor-joining turns the distances into a tree, rebuilt from different song samples to show which branches hold up.</p></div>
     </div>
   </div>
@@ -334,7 +334,8 @@ function renderPanel() {
     b.innerHTML = `<span class="rank">0${i + 1}</span><span class="dot"></span><span class="name"></span><span class="d"></span>`;
     b.querySelector(".dot").style.background = pal[byName.get(n.name)[colorBy]];
     b.querySelector(".name").textContent = n.name;
-    b.querySelector(".d").textContent = n.distance.toFixed(3);
+    b.querySelector(".d").textContent = `+${(n.closer_than_expected * 100).toFixed(1)}%`;
+    b.title = `NCD ${n.distance.toFixed(3)}`;
     b.addEventListener("click", () => select(n.name));
     li.append(b);
     ol.append(li);

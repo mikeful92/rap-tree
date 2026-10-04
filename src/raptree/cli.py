@@ -58,11 +58,18 @@ def cmd_build(args):
     D = np.mean(reps, axis=0)
     t = tree.build_tree(D, names, reps if args.replicates > 1 else [])
 
+    # Some artists sit close to everyone (a "central" vocabulary). For the
+    # nearest-neighbour lists, compare each pair with what their average
+    # distances predict, so lists show who is unusually close.
+    m = D.sum(axis=1) / (len(D) - 1)
+    expected = m[:, None] + m[None, :] - m.mean()
+    closer = (expected - D) / expected
+
     first = [distance.sample(s, size, 0) for s in songs]
     info = []
     for k, a in enumerate(artists):
         words = re.findall(r"[a-z0-9']+", first[k].decode())
-        order = np.argsort(D[k])
+        order = np.argsort(-closer[k])
         info.append(
             {
                 "name": a.name,
@@ -73,7 +80,13 @@ def cmd_build(args):
                 "unique_words": len(set(words)),
                 "compression_ratio": round(distance.compressed_size(first[k], args.compressor) / size, 4),
                 "nearest": [
-                    {"name": names[j], "distance": round(float(D[k, j]), 5)} for j in order if j != k
+                    {
+                        "name": names[j],
+                        "distance": round(float(D[k, j]), 5),
+                        "closer_than_expected": round(float(closer[k, j]), 5),
+                    }
+                    for j in order
+                    if j != k
                 ][:5],
             }
         )
@@ -130,9 +143,9 @@ def main():
 
     def analysis(sp):
         common(sp)
-        sp.add_argument("--measure", choices=["benedetto", "ncd"], default="benedetto")
+        sp.add_argument("--measure", choices=["ncd", "benedetto"], default="ncd")
         sp.add_argument("--compressor", choices=["lzma", "zstd", "bz2", "gzip"], default="lzma")
-        sp.add_argument("--sample-kb", type=float, default=30, help="bytes of lyrics per artist")
+        sp.add_argument("--sample-kb", type=float, default=60, help="bytes of lyrics per artist")
         sp.add_argument("--probe-kb", type=float, default=3, help="appended chunk size (benedetto)")
         sp.add_argument("--workers", type=int, default=None)
 
@@ -153,6 +166,7 @@ def main():
 
     sp = sub.add_parser("validate", help="check each artist is closest to itself")
     analysis(sp)
+    sp.set_defaults(sample_kb=30)  # needs two disjoint samples per artist
     sp.set_defaults(func=cmd_validate)
 
     args = p.parse_args()
