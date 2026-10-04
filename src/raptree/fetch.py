@@ -28,7 +28,7 @@ def client():
     token = os.environ.get("GENIUS_ACCESS_TOKEN")
     if not token:
         sys.exit("GENIUS_ACCESS_TOKEN is not set. Copy .env.example to .env and fill it in.")
-    return lyricsgenius.Genius(token, timeout=20, retries=3, sleep_time=0.5, verbose=False)
+    return lyricsgenius.Genius(token, timeout=20, retries=3, sleep_time=0.5)
 
 
 def list_songs(genius, artist_id: int, max_songs: int) -> list[dict]:
@@ -51,11 +51,12 @@ def fetch_artist(genius, artist: Artist, max_songs: int) -> None:
     if found is None:
         print(f"  !! no Genius artist found for {artist.name!r}")
         return
-    print(f"{artist.name} -> Genius: {found.name} (id {found.id})")
+    artist_id = found._body["id"]  # lyricsgenius's Artist type doesn't expose id
+    print(f"{artist.name} -> Genius: {found.name} (id {artist_id})")
 
     out_dir = RAW_DIR / artist.slug
     out_dir.mkdir(parents=True, exist_ok=True)
-    songs = list_songs(genius, found.id, max_songs)
+    songs = list_songs(genius, artist_id, max_songs)
 
     rows = []
     for i, s in enumerate(songs, 1):

@@ -19,6 +19,8 @@ shared hook
 ad-lib verse
 [Outro: SZA]
 sza line
+[Skit]
+mom on the phone
 You might also like
 4Embed"""
     names = {clean.norm_name("Kendrick Lamar"), clean.norm_name("K.Dot")}

@@ -24,6 +24,7 @@ JUNK = [
     re.compile(r"^get tickets as low as", re.I),
     re.compile(r"^\d*embed$", re.I),
 ]
+SKIT = re.compile(r"\b(skit|dialogue|voicemail|speech)\b", re.I)
 NAME_SPLIT = re.compile(r"\s*(?:&|,|\+|\band\b|\bwith\b|/)\s*", re.I)
 
 
@@ -61,6 +62,7 @@ def artist_sections(lyrics: str, names: set[str]) -> list[str]:
         if m:
             performers = header_names(m.group(1))
             keep = performers is None or any(p in names for p in performers)
+            keep = keep and not SKIT.search(m.group(1).split(":")[0])
             continue
         if not line or any(j.search(line) for j in JUNK):
             continue
