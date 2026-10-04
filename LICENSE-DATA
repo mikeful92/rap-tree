@@ -1,0 +1,14 @@
+The generated data in this repository (docs/data/: distance matrices, trees,
+per-artist statistics) and the artist list (artists.csv) are licensed under
+the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+Copyright (c) 2026 Michael Cordoba
+
+You are free to share and adapt this data for any purpose, provided you give
+appropriate credit, link to the license, and indicate if changes were made.
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+This license covers only the derived data produced by this project. Song
+titles and Genius URLs in data/manifest/ are factual references to Genius.com.
+Song lyrics are not included in this repository and remain the property of
+their respective copyright holders.

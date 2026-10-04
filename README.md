@@ -66,3 +66,9 @@ Compression sees surface text: vocabulary, slang, spellings, names, ad-libs. It 
 ## Adding artists
 
 Add a row to `artists.csv`: `name` is the Genius search term, and `aliases` are other names used in section headers (`;`-separated). Then run `raptree fetch --only "<name>"`, `raptree clean` and `raptree build`.
+
+## License
+
+- Code: [MIT](LICENSE)
+- Generated data (`docs/data/`, `artists.csv`): [CC BY 4.0](LICENSE-DATA)
+- Lyrics are not included and remain the property of their copyright holders.
