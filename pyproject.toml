@@ -1,0 +1,19 @@
+[project]
+name = "raptree"
+version = "0.1.0"
+description = "Cluster rap artists into a tree using compression distance on their lyrics"
+requires-python = ">=3.11"
+dependencies = ["lyricsgenius>=3.7", "numpy>=1.26"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+raptree = "raptree.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
