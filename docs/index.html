@@ -4,149 +4,348 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rap Lyric Tree</title>
+<meta name="description" content="Rap artists grouped by nothing but their words: a family tree built from how well their lyrics compress together.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #fbfaf7; --fg: #1d1b18; --muted: #6b665e; --line: #b9b2a6; --panel: #f1eee8; --accent: #b4441e;
-  --c1: #2f6db5; --c2: #c2410c; --c3: #15803d; --c4: #8b3fb3; --c5: #b8860b; --c6: #0e7490; --c7: #be185d;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #15140f; --fg: #ece8df; --muted: #a29c90; --line: #5c574e; --panel: #222019; --accent: #f08a5d;
-    --c1: #6ea8ec; --c2: #f59e5b; --c3: #5bc983; --c4: #c18be6; --c5: #e4bb4b; --c6: #4cc3d9; --c7: #ef6fa8;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #15140f; --fg: #ece8df; --muted: #a29c90; --line: #5c574e; --panel: #222019; --accent: #f08a5d;
-  --c1: #6ea8ec; --c2: #f59e5b; --c3: #5bc983; --c4: #c18be6; --c5: #e4bb4b; --c6: #4cc3d9; --c7: #ef6fa8;
+  --bg: #0E0E0C; --panel: #171613; --groove: #1A1916; --rule: #2A2925;
+  --fg: #F2EFE8; --body: #C9C5BC; --muted: #9A968C; --faint: #8C887F;
+  --branch: #4A4740; --accent: #FF5A1F;
+  --display: "Big Shoulders Display", Impact, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-header, main { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-header { padding-top: 28px; }
-h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: -0.01em; }
-header p { color: var(--muted); max-width: 70ch; margin: 0 0 14px; }
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 8px; font-size: 14px; }
-.controls label { color: var(--muted); }
-select { font: inherit; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; margin-bottom: 10px; }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--sw); margin-right: 5px; }
-.meta { font-size: 12px; color: var(--muted); }
-main { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 20px; padding-bottom: 40px; }
-@media (max-width: 760px) { main { grid-template-columns: 1fr; } aside { order: -1; } }
-#chart { overflow-x: auto; }
-svg text { fill: var(--fg); font-size: 13px; }
-.branch { fill: none; stroke: var(--line); stroke-width: 1.4; }
-.support { font-size: 10px; fill: var(--muted); }
-.leaf { cursor: pointer; }
-.leaf:hover text, .leaf.sel text { font-weight: 700; }
-.leaf.dim { opacity: 0.25; }
-aside { position: sticky; top: 12px; align-self: start; background: var(--panel); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
-aside h2 { font-size: 18px; margin: 0 0 4px; }
-aside .sub { color: var(--muted); margin-bottom: 10px; }
-aside dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0 0 10px; }
-aside dt { color: var(--muted); }
-aside dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-aside ol { margin: 0; padding-left: 20px; }
-aside li { cursor: pointer; }
-aside li span { color: var(--muted); font-variant-numeric: tabular-nums; }
-.empty { color: var(--muted); }
+html { color-scheme: dark; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.6 var(--mono); }
+a { color: var(--fg); }
+a:hover { color: var(--accent); }
+.wrap { max-width: 1440px; margin: 0 auto; padding-inline: 48px; }
+@media (max-width: 700px) { .wrap { padding-inline: 16px; } }
+
+header.top { border-bottom: 1px solid var(--rule); }
+header.top .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; padding-block: 24px; }
+.brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+.wordmark { font: 900 30px/1 var(--display); letter-spacing: 0.04em; text-transform: uppercase; }
+.small { font-size: 12px; color: var(--muted); }
+nav { display: flex; gap: 24px; font-size: 13px; }
+
+main.wrap { display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; padding-block: 48px 72px; }
+.stage { flex: 999 1 680px; min-width: 0; }
+h1 { margin: 0 0 18px; font: 900 clamp(64px, 9vw, 104px)/0.88 var(--display); text-transform: uppercase; letter-spacing: 0.01em; }
+.lede { margin: 0 0 28px; max-width: 60ch; color: var(--body); }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-bottom: 8px; }
+.label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.seg { display: inline-flex; border: 1px solid #3A3833; border-radius: 999px; padding: 3px; margin-left: 10px; vertical-align: middle; }
+.seg button { border: 0; border-radius: 999px; padding: 6px 14px; min-height: 32px; cursor: pointer; font: 500 12px var(--mono); background: transparent; color: var(--fg); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--body); }
+.legend span, .swatch-row { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.dash { width: 18px; border-top: 1.5px dashed var(--branch); }
+
+.record-box { position: relative; margin-top: 8px; }
+.record { position: absolute; top: 0; left: 50%; width: 840px; height: 840px; transform-origin: top center; }
+.record svg { position: absolute; inset: 0; }
+.leaf-dot { position: absolute; left: 420px; top: 420px; width: 8px; height: 8px; border-radius: 50%; transform-origin: 0 0; }
+.leaf { position: absolute; left: 420px; top: 420px; transform-origin: 0 0; background: none; border: 0; padding: 0; cursor: pointer; white-space: nowrap; font: 400 12px/14px var(--mono); color: var(--faint); }
+.leaf.near { color: var(--fg); }
+.leaf.sel { color: var(--accent); font-weight: 600; }
+.leaf:hover, .leaf:focus-visible { color: var(--fg); text-decoration: underline; outline: none; }
+
+aside { flex: 1 1 340px; max-width: 440px; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 28px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+aside h2 { margin: 6px 0 2px; font: 900 56px/0.95 var(--display); text-transform: uppercase; overflow-wrap: anywhere; }
+.sub { color: var(--muted); margin-bottom: 20px; }
+dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; margin: 0 0 24px; padding-block: 16px; border-block: 1px solid var(--rule); }
+dt { color: var(--muted); }
+dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.near-title { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+ol.near { list-style: none; margin: 0; padding: 0; }
+ol.near button { width: 100%; display: flex; align-items: center; gap: 12px; min-height: 44px; background: none; border: 0; border-bottom: 1px solid #23221E; padding: 0; color: var(--fg); font: inherit; text-align: left; cursor: pointer; }
+ol.near button:hover { color: var(--accent); }
+ol.near .rank { color: var(--muted); width: 22px; }
+ol.near .name { flex: 1; }
+ol.near .d { color: var(--muted); font-variant-numeric: tabular-nums; }
+.hint { margin: 20px 0 0; font-size: 12px; color: var(--muted); }
+
+section.how, footer { border-top: 1px solid var(--rule); }
+section.how .wrap { padding-block: 56px; }
+section.how h2 { margin: 0 0 28px; font: 900 44px/1 var(--display); text-transform: uppercase; }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; }
+.num { font: 900 40px/1 var(--display); color: var(--accent); }
+.steps h3 { margin: 8px 0 6px; font-size: 16px; font-weight: 600; }
+.steps p { margin: 0; color: var(--body); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; padding-block: 24px 40px; font-size: 12px; color: var(--muted); }
 #error { color: var(--accent); }
 </style>
 </head>
 <body>
-<header>
-  <h1>Rap Lyric Tree</h1>
-  <p>Artists grouped by how well a compressor trained on one artist's lyrics compresses another's. Shared slang, ad-libs, spellings and phrasing make text cheaper to compress, so artists that share them end up on nearby branches. Numbers on branches show how often a group reappears when the tree is rebuilt from different song samples.</p>
-  <div class="controls">
-    <label>Color by <select id="colorBy"><option value="region">Region</option><option value="era">Era</option></select></label>
-    <span class="meta" id="meta"></span>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="wordmark">Rap Lyric Tree</span>
+      <span class="small" id="meta"></span>
+    </div>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="https://github.com/mikeful92/rap-tree">GitHub</a>
+    </nav>
   </div>
-  <div class="legend" id="legend"></div>
-  <div id="error"></div>
 </header>
-<main>
-  <div id="chart"></div>
-  <aside id="panel"><p class="empty">Select an artist to see their closest matches.</p></aside>
-</main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script>
-const params = new URLSearchParams(location.search);
-const src = `data/${params.get("build") || "latest"}/tree.json`;
-const palette = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7"].map(v => `var(${v})`);
-let data, byName, selected = null;
 
-fetch(src).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
-  data = d;
-  byName = new Map(d.artists.map(a => [a.name, a]));
-  const m = d.meta;
-  document.getElementById("meta").textContent =
-    `${d.artists.length} artists · ${m.measure} distance · ${m.compressor} · ${Math.round(m.sample_bytes / 1000)} KB each · ${m.replicates} resamples · built ${m.built}`;
-  draw();
-}).catch(e => {
-  document.getElementById("error").textContent = `Couldn't load ${src} (${e.message}). Run "raptree build" first.`;
-});
+<main class="wrap">
+  <section class="stage">
+    <h1>Who raps<br>like who.</h1>
+    <p class="lede"><span id="count">These</span> artists, grouped by nothing but their words. A compressor that has read one artist's lyrics squeezes a similar artist's lyrics smaller: shared slang, ad-libs and phrasing make the text cheaper to encode. Those savings, pair by pair, grow this tree.</p>
+    <div class="controls">
+      <div><span class="label">Color by</span><span class="seg" role="group" aria-label="Color by">
+        <button type="button" data-color="region" aria-pressed="true">Region</button>
+        <button type="button" data-color="era" aria-pressed="false">Era</button>
+      </span></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <p id="error"></p>
+    <div class="record-box" id="recordBox">
+      <div class="record" id="record">
+        <svg viewBox="0 0 840 840" aria-hidden="true">
+          <circle cx="420" cy="420" r="412" fill="#121210" stroke="#1E1D1A"/>
+          <circle cx="420" cy="420" r="330" fill="none" stroke="#1A1916"/>
+          <circle cx="420" cy="420" r="250" fill="none" stroke="#1A1916"/>
+          <circle cx="420" cy="420" r="190" fill="none" stroke="#1A1916"/>
+          <circle cx="420" cy="420" r="130" fill="none" stroke="#1A1916"/>
+          <path id="solid" fill="none" stroke="#4A4740" stroke-width="1.4" stroke-linecap="round"/>
+          <path id="dashed" fill="none" stroke="#4A4740" stroke-width="1.4" stroke-dasharray="3 4"/>
+          <path id="trail" fill="none" stroke="#FF5A1F" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="420" cy="420" r="46" fill="#FF5A1F"/>
+          <circle cx="420" cy="420" r="4" fill="#0E0E0C"/>
+        </svg>
+        <div id="leaves"></div>
+      </div>
+    </div>
+  </section>
 
-document.getElementById("colorBy").addEventListener("change", draw);
-addEventListener("resize", () => data && draw());
-
-function colorScale(key) {
-  const values = [...new Set(data.artists.map(a => a[key]))].sort();
-  return { values, color: v => palette[values.indexOf(v) % palette.length] };
-}
-
-function draw() {
-  const key = document.getElementById("colorBy").value;
-  const { values, color } = colorScale(key);
-  document.getElementById("legend").innerHTML =
-    values.map(v => `<span style="--sw:${color(v)}">${v}</span>`).join("");
-
-  const root = d3.hierarchy(data.tree);
-  root.each(n => { n.dist = (n.parent ? n.parent.dist : 0) + (n.data.length || 0); });
-  const leaves = root.leaves();
-  const rowH = 20, labelW = 190, pad = 8;
-  const width = Math.max(document.getElementById("chart").clientWidth, 520);
-  const height = leaves.length * rowH + pad * 2;
-  const x = d3.scaleLinear().domain([0, d3.max(leaves, l => l.dist)]).range([pad, width - labelW]);
-  leaves.forEach((l, i) => { l.y = pad + i * rowH + rowH / 2; });
-  root.eachAfter(n => { if (n.children) n.y = (n.children[0].y + n.children[n.children.length - 1].y) / 2; });
-
-  const svg = d3.select("#chart").html("").append("svg").attr("width", width).attr("height", height);
-  svg.append("g").selectAll("path").data(root.links()).join("path").attr("class", "branch")
-    .attr("d", l => `M${x(l.source.dist)},${l.source.y}V${l.target.y}H${x(l.target.dist)}`);
-  svg.append("g").selectAll("text").data(root.descendants().filter(n => n.children && n.data.support >= 0.5 && n.parent))
-    .join("text").attr("class", "support").attr("x", n => x(n.dist) - 3).attr("y", n => n.y - 3)
-    .attr("text-anchor", "end").text(n => Math.round(n.data.support * 100));
-
-  const leaf = svg.append("g").selectAll("g").data(leaves).join("g").attr("class", "leaf")
-    .attr("transform", l => `translate(${x(l.dist)},${l.y})`)
-    .on("click", (_, l) => select(l.data.name));
-  leaf.append("line").attr("x1", 0).attr("x2", n => width - labelW - x(n.dist) + 4)
-    .attr("stroke", "var(--line)").attr("stroke-dasharray", "1 3");
-  leaf.append("circle").attr("r", 4.5).attr("cx", n => width - labelW - x(n.dist) + 10)
-    .attr("fill", l => color(byName.get(l.data.name)[key]));
-  leaf.append("text").attr("x", n => width - labelW - x(n.dist) + 20).attr("dy", "0.35em").text(l => l.data.name);
-  highlight();
-}
-
-function select(name) { selected = selected === name ? null : name; highlight(); }
-
-function highlight() {
-  const a = selected && byName.get(selected);
-  const near = new Set(a ? [a.name, ...a.nearest.map(n => n.name)] : []);
-  d3.selectAll(".leaf").classed("sel", l => l.data.name === selected).classed("dim", l => a && !near.has(l.data.name));
-  const panel = document.getElementById("panel");
-  if (!a) { panel.innerHTML = `<p class="empty">Select an artist to see their closest matches.</p>`; return; }
-  panel.innerHTML = `
-    <h2>${a.name}</h2><div class="sub">${a.region} · ${a.era}</div>
+  <aside id="panel" aria-live="polite">
+    <div class="eyebrow">Liner notes</div>
+    <h2 id="selName">—</h2>
+    <div class="sub" id="selSub"></div>
     <dl>
-      <dt>Songs used</dt><dd>${a.songs}</dd>
-      <dt>Lyrics after cleaning</dt><dd>${(a.corpus_bytes / 1000).toFixed(0)} KB</dd>
-      <dt>Unique words in sample</dt><dd>${a.unique_words.toLocaleString()}</dd>
-      <dt>Compresses to</dt><dd>${(a.compression_ratio * 100).toFixed(1)}%</dd>
+      <dt>Songs used</dt><dd id="stSongs">—</dd>
+      <dt>Lyrics after cleaning</dt><dd id="stBytes">—</dd>
+      <dt>Unique words in sample</dt><dd id="stWords">—</dd>
+      <dt>Compresses to</dt><dd id="stRatio">—</dd>
     </dl>
-    <strong>Closest artists</strong>
-    <ol>${a.nearest.map(n => `<li data-n="${n.name}">${n.name} <span>${n.distance.toFixed(3)}</span></li>`).join("")}</ol>`;
-  panel.querySelectorAll("li").forEach(li => li.addEventListener("click", () => select(li.dataset.n)));
+    <div class="near-title">Closest by compression</div>
+    <ol class="near" id="near"></ol>
+    <p class="hint">Click any name on the record to read its notes. Dashed branches are groupings that held up in fewer than half of the resampled trees.</p>
+  </aside>
+</main>
+
+<section class="how" id="how">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div><div class="num">01</div><h3>Collect</h3><p>About 60 popular songs per artist from Genius. Guest verses and repeated hooks are stripped, so every line is the artist's own.</p></div>
+      <div><div class="num">02</div><h3>Compress</h3><p>Every artist gets the same amount of text. Append a chunk of one artist's lyrics to another's and count the extra bytes it costs to compress (Benedetto, Caglioti &amp; Loreto, <a href="https://arxiv.org/abs/cond-mat/0108530">2002</a>).</p></div>
+      <div><div class="num">03</div><h3>Grow</h3><p>Neighbor-joining turns the distances into a tree, rebuilt from different song samples to show which branches hold up.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Lyrics are not included and remain the property of their copyright holders.</span>
+    <span>Code MIT · Data CC BY 4.0 · <a href="https://github.com/mikeful92/rap-tree">github.com/mikeful92/rap-tree</a></span>
+  </div>
+</footer>
+
+<script>
+const REGION = { West: "#4EA8FF", East: "#FF8A3D", South: "#B58CFF", Midwest: "#3FD08A", Canada: "#F2D04B", UK: "#FF6FA8" };
+const ERA = { "1990s": "#F2D04B", "2000s": "#FF8A3D", "2010s": "#4EA8FF", "2020s": "#B58CFF" };
+const FALLBACK = ["#4EA8FF", "#FF8A3D", "#B58CFF", "#3FD08A", "#F2D04B", "#FF6FA8", "#5ED3E0"];
+const C = 420, R = 290, SIZE = 840;
+// shorter labels so long names stay on the record
+const SHORT = {
+  "YoungBoy Never Broke Again": "NBA YoungBoy", "The Notorious B.I.G.": "Biggie", "Bone Thugs-N-Harmony": "Bone Thugs",
+  "Tyler, The Creator": "Tyler", "Megan Thee Stallion": "Megan", "Conway the Machine": "Conway",
+  "Chance the Rapper": "Chance", "Ghostface Killah": "Ghostface",
+};
+const $ = (id) => document.getElementById(id);
+const f1 = (v) => v.toFixed(1);
+
+let artists, byName, root, leaves, colorBy = "region", selected = null;
+
+const build = new URLSearchParams(location.search).get("build") || "latest";
+fetch(`data/${build}/tree.json`)
+  .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(init)
+  .catch((e) => { $("error").textContent = `Couldn't load data/${build}/tree.json (${e.message}).`; });
+
+function init(data) {
+  artists = data.artists;
+  byName = new Map(artists.map((a) => [a.name, a]));
+  const m = data.meta;
+  $("count").textContent = `${artists.length}`;
+  $("meta").textContent = `${m.measure} distance · ${m.compressor} · ${Math.round(m.sample_bytes / 1000)} KB per artist · built ${m.built}`;
+
+  root = data.tree;
+  leaves = [];
+  (function index(n, p) {
+    n.p = p;
+    if (n.children) n.children.forEach((k) => index(k, n));
+    else { n.i = leaves.length; leaves.push(n); }
+  })(root, null);
+  (function height(n) { return (n.h = n.children ? 1 + Math.max(...n.children.map(height)) : 0); })(root);
+  const step = (R - 64) / root.h;
+  (function place(n) {
+    if (n.children) { n.children.forEach(place); n.a = (n.children[0].a + n.children.at(-1).a) / 2; }
+    else n.a = (n.i / leaves.length) * 2 * Math.PI - Math.PI / 2;
+    n.r = R - n.h * step;
+  })(root);
+
+  drawBranches();
+  drawLeaves();
+  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => setColor(b.dataset.color)));
+  addEventListener("resize", fit);
+  addEventListener("hashchange", fromHash);
+  fit();
+  fromHash() || select(byName.has("Kendrick Lamar") ? "Kendrick Lamar" : leaves[0].name, false);
+  setColor(colorBy);
+}
+
+const P = (r, a) => `${f1(C + r * Math.cos(a))},${f1(C + r * Math.sin(a))}`;
+const arc = (r, a0, a1) => `M${P(r, a0)}A${f1(r)},${f1(r)} 0 ${Math.abs(a1 - a0) > Math.PI ? 1 : 0} ${a1 > a0 ? 1 : 0} ${P(r, a1)}`;
+
+function drawBranches() {
+  let solid = "", dashed = "";
+  (function draw(n) {
+    if (!n.children) return;
+    // a clade that rarely reappears in resampled trees gets a dashed stem
+    const shaky = n.p && n.support !== undefined && n.support < 0.5;
+    const arcPath = arc(n.r, n.children[0].a, n.children.at(-1).a);
+    if (shaky) dashed += arcPath; else solid += arcPath;
+    n.children.forEach((k) => {
+      const seg = `M${P(n.r, k.a)}L${P(k.r, k.a)}`;
+      const kShaky = k.children && k.support !== undefined && k.support < 0.5;
+      if (kShaky) dashed += seg; else solid += seg;
+      draw(k);
+    });
+  })(root);
+  $("solid").setAttribute("d", solid);
+  $("dashed").setAttribute("d", dashed);
+}
+
+function drawLeaves() {
+  const box = $("leaves");
+  box.innerHTML = "";
+  for (const l of leaves) {
+    const deg = (l.a * 180) / Math.PI;
+    const left = Math.cos(l.a) < -1e-4;
+    const dot = document.createElement("span");
+    dot.className = "leaf-dot";
+    dot.style.transform = `rotate(${f1(deg)}deg) translate(${R + 4}px, -4px)`;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "leaf";
+    btn.textContent = SHORT[l.name] || l.name;
+    btn.setAttribute("aria-label", l.name);
+    btn.style.transform = left
+      ? `rotate(${f1(deg + 180)}deg) translate(-${R + 18}px, -7px) translateX(-100%)`
+      : `rotate(${f1(deg)}deg) translate(${R + 18}px, -7px)`;
+    btn.addEventListener("click", () => select(l.name));
+    l.dot = dot;
+    l.btn = btn;
+    box.append(dot, btn);
+  }
+}
+
+function palette() {
+  if (colorBy === "region" || colorBy === "era") {
+    const fixed = colorBy === "era" ? ERA : REGION;
+    const values = [...new Set(artists.map((a) => a[colorBy]))].sort();
+    let extra = 0;
+    return Object.fromEntries(values.map((v) => [v, fixed[v] || FALLBACK[extra++ % FALLBACK.length]]));
+  }
+}
+
+function setColor(key) {
+  colorBy = key;
+  document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.color === key));
+  const pal = palette();
+  $("legend").innerHTML = "";
+  for (const [label, color] of Object.entries(pal)) {
+    const s = document.createElement("span");
+    s.innerHTML = `<span class="dot"></span>`;
+    s.firstChild.style.background = color;
+    s.append(label);
+    $("legend").append(s);
+  }
+  const d = document.createElement("span");
+  d.innerHTML = `<span class="dash"></span>`;
+  d.append("unstable grouping");
+  $("legend").append(d);
+  for (const l of leaves) l.dot.style.background = pal[byName.get(l.name)[colorBy]];
+  if (selected) renderPanel();
+}
+
+function fromHash() {
+  const name = decodeURIComponent(location.hash.slice(1));
+  if (byName.has(name)) { select(name, false); return true; }
+  return false;
+}
+
+function select(name, updateHash = true) {
+  selected = name;
+  if (updateHash) history.replaceState(null, "", `#${encodeURIComponent(name)}`);
+  const a = byName.get(name);
+  const near = new Set(a.nearest.map((n) => n.name));
+  let trail = "";
+  for (const l of leaves) {
+    l.btn.classList.toggle("sel", l.name === name);
+    l.btn.classList.toggle("near", near.has(l.name));
+    if (l.name === name) {
+      for (let k = l; k.p; k = k.p) {
+        // the root spans the whole record, so its trail starts straight out from the center
+        trail += (k.p.p ? arc(k.p.r, k.p.a, k.a) : "") + `M${P(k.p.r, k.a)}L${P(k.r, k.a)}`;
+      }
+    }
+  }
+  $("trail").setAttribute("d", trail);
+  renderPanel();
+}
+
+function renderPanel() {
+  const a = byName.get(selected);
+  const pal = palette();
+  $("selName").textContent = a.name;
+  $("selSub").textContent = `${a.region} · ${a.era}`;
+  $("stSongs").textContent = a.songs;
+  $("stBytes").textContent = `${Math.round(a.corpus_bytes / 1000)} KB`;
+  $("stWords").textContent = a.unique_words.toLocaleString();
+  $("stRatio").textContent = `${(a.compression_ratio * 100).toFixed(1)}%`;
+  const ol = $("near");
+  ol.innerHTML = "";
+  a.nearest.forEach((n, i) => {
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.innerHTML = `<span class="rank">0${i + 1}</span><span class="dot"></span><span class="name"></span><span class="d"></span>`;
+    b.querySelector(".dot").style.background = pal[byName.get(n.name)[colorBy]];
+    b.querySelector(".name").textContent = n.name;
+    b.querySelector(".d").textContent = n.distance.toFixed(3);
+    b.addEventListener("click", () => select(n.name));
+    li.append(b);
+    ol.append(li);
+  });
+}
+
+function fit() {
+  // shrink the record to fit narrow screens
+  const scale = Math.min(1, $("recordBox").clientWidth / SIZE);
+  $("record").style.transform = `translateX(-50%) scale(${scale})`;
+  $("recordBox").style.height = `${SIZE * scale}px`;
 }
 </script>
 </body>
